@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tic‑Tac‑Toe</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="game">
+    <h1>Tic‑Tac‑Toe</h1>
+    <div class="controls">
+      <label><input type="radio" name="mode" value="pvp" checked> Player vs Player</label>
+      <label><input type="radio" name="mode" value="pvc"> Player vs Computer</label>
+      <button id="restart">Restart</button>
+    </div>
+    <div class="board">
+      <!-- 9 cells -->
+      <div class="cell" data-index="0"></div>
+      ...
+      <div class="cell" data-index="8"></div>
+    </div>
+    <div class="message"></div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
+body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f0f0f0; }
+.game { text-align: center; }
+.board { display: grid; grid-template-columns: repeat(3, 100px); grid-gap: 5px; margin: 20px auto; }
+.cell { width:100px; height:100px; background:#fff; font-size:2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.cell.X { color:#e74c3c; }
+.cell.O { color:#3498db; }
+.cell.winner { background:#f9e79f; }
+.controls { margin:10px; }
+const cells = document.querySelectorAll('.cell');
+const messageEl = document.querySelector('.message');
+const restartBtn = document.getElementById('restart');
+const modeRadios = document.getElementsByName('mode');
+
+let board, currentPlayer, gameActive, vsAI;
+
+const winCombos = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+
+// Minimax AI (unbeatable)
+function minimax(newBoard, player) {
+  const avail = newBoard.reduce((a,v,i)=> v===''? a.concat(i):a,[]);
+  if (checkWin(newBoard, 'X')) return {score:-10};
+  if (checkWin(newBoard, 'O')) return {score:10};
+  if (avail.length===0) return {score:0};
+
+  const moves = [];
+  for (let idx of avail) {
+    const move = {index: idx};
+    newBoard[idx] = player;
+    const result = minimax(newBoard,
+      player==='O' ? 'X':'O');
+    move.score = result.score;
+    newBoard[idx] = '';
+    moves.push(move);
+  }
+  let best;
+  if (player === 'O') {
+    best = moves.reduce((a,b)=> b.score>a.score?b:a);
+  } else {
+    best = moves.reduce((a,b)=> b.score<a.score?b:a);
+  }
+  return best;
+}
+
+function checkWin(bd, player) {
+  return winCombos.some(combo => combo.every(i=> bd[i]===player));
+}
+
+function gameCheck() {
+  let won = winCombos.find(c => c.every(i=>board[i]===currentPlayer));
+  if (won) {
+    gameActive = false;
+    won.forEach(i=> {
+      cells[i].classList.add('winner');
+    });
+    messageEl.textContent = `Player ${currentPlayer} wins!`;
+    return;
+  }
+  if (!board.includes('')) {
+    gameActive = false;
+    messageEl.textContent = `It's a draw!`;
+    return;
+  }
+  currentPlayer = currentPlayer==='X'?'O':'X';
+  messageEl.textContent = `Turn: ${currentPlayer}${vsAI && currentPlayer==='O'?' (Computer)':''}`;
+  if (vsAI && currentPlayer==='O') computerMove();
+}
+
+function playerMove(idx) {
+  if (!gameActive || board[idx]!=='') return;
+  board[idx]=currentPlayer;
+  cells[idx].classList.add(currentPlayer);
+  gameCheck();
+}
+
+function computerMove() {
+  const move = minimax(board.slice(), 'O');
+  playerMove(move.index);
+}
+
+function init() {
+  board = ['','','','','','','','',''];
+  currentPlayer = 'X';
+  gameActive = true;
+  vsAI = document.querySelector('input[name=mode]:checked').value==='pvc';
+  cells.forEach(c=> {
+    c.textContent='';
+    c.className='cell';
+    c.onclick = ()=> playerMove(parseInt(c.dataset.index));
+  });
+  messageEl.textContent = `Turn: ${currentPlayer}`;
+  if (vsAI && currentPlayer==='O') computerMove();
+}
+
+restartBtn.onclick = init;
+modeRadios.forEach(r=> r.onchange = init);
+
+init();
