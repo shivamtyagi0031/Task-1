@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Interactive Fixed Nav</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+
+  <nav id="main-nav" class="nav">
+    <ul class="nav-list">
+      <li class="nav-item"><a href="#home">Home</a></li>
+      <li class="nav-item"><a href="#about">About</a></li>
+      <li class="nav-item"><a href="#services">Services</a></li>
+      <li class="nav-item"><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <div class="content">
+    <!-- Sample content to enable scrolling -->
+    <section id="home"><h1>Home</h1></section>
+    <section id="about"><h1>About</h1></section>
+    <section id="services"><h1>Services</h1></section>
+    <section id="contact"><h1>Contact</h1></section>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+/* Base reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Navigation */
+.nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  z-index: 1000;
+}
+
+.nav.scrolled {
+  background: #333;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.nav-list {
+  display: flex;
+  list-style: none;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.nav-item {
+  margin: 0 1rem;
+}
+
+.nav-item a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.nav.scrolled .nav-item a {
+  color: #fff;
+}
+
+/* Hover */
+.nav-item a:hover {
+  color: #007BFF;
+}
+
+/* Page content spacing */
+.content {
+  padding-top: 80px; /* to compensate for fixed nav */
+}
+
+section {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const nav = document.getElementById("main-nav");
+  const scrollThreshold = 50;
+
+  window.addEventListener("scroll", () => {
+    if (window.scrollY > scrollThreshold) {
+      nav.classList.add("scrolled");
+    } else {
+      nav.classList.remove("scrolled");
+    }
+  });
+});
